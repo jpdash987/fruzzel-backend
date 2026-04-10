@@ -15,7 +15,8 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList("https://fruzzel.vercel.app", "http://localhost:3000"));
+        config.setAllowedOrigins(
+                Arrays.asList("https://fruzzel.in", "https://www.fruzzel.in", "http://localhost:3000"));
         config.setAllowedHeaders(Arrays.asList("*"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
