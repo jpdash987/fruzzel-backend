@@ -2,8 +2,12 @@ package com.tracker.service;
 
 import com.tracker.dto.CustomerDTO;
 import com.tracker.entity.Customer;
+import com.tracker.entity.DailyEntry;
 import com.tracker.exception.ResourceNotFoundException;
 import com.tracker.repository.CustomerRepository;
+import com.tracker.repository.DailyEntryRepository;
+import com.tracker.repository.ItemEntryRepository;
+import com.tracker.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +21,9 @@ import java.util.stream.Collectors;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final DailyEntryRepository dailyEntryRepository;
+    private final ItemEntryRepository itemEntryRepository;
+    private final ItemRepository itemRepository;
 
     public CustomerDTO createCustomer(CustomerDTO dto) {
         Customer customer = Customer.builder()
@@ -50,9 +57,22 @@ public class CustomerService {
     }
 
     public void deleteCustomer(Long id) {
-        if (!customerRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Customer", id);
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer", id));
+
+        // Bypass JPA cascading errors by dropping constraint branches expressly
+        List<DailyEntry> dailyEntries = dailyEntryRepository.findByCustomerId(id);
+        for (DailyEntry de : dailyEntries) {
+            itemEntryRepository.deleteAll(de.getItemEntries());
         }
+        itemEntryRepository.flush();
+
+        dailyEntryRepository.deleteAll(dailyEntries);
+        dailyEntryRepository.flush();
+        
+        itemRepository.deleteAll(customer.getItems());
+        itemRepository.flush();
+        
         customerRepository.deleteById(id);
     }
 

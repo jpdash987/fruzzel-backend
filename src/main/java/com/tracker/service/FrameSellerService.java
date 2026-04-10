@@ -4,6 +4,7 @@ import com.tracker.dto.FrameSellerDTO;
 import com.tracker.entity.FrameSeller;
 import com.tracker.exception.ResourceNotFoundException;
 import com.tracker.repository.FrameSellerRepository;
+import com.tracker.repository.FrameEntryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 public class FrameSellerService {
 
     private final FrameSellerRepository frameSellerRepository;
+    private final FrameEntryRepository frameEntryRepository;
 
     public FrameSellerDTO createFrameSeller(FrameSellerDTO dto) {
         FrameSeller seller = FrameSeller.builder()
@@ -53,6 +55,8 @@ public class FrameSellerService {
         if (!frameSellerRepository.existsById(id)) {
             throw new ResourceNotFoundException("FrameSeller", id);
         }
+        frameEntryRepository.deleteByFrameSellerId(id);
+        frameEntryRepository.flush();
         frameSellerRepository.deleteById(id);
     }
 

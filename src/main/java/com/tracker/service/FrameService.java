@@ -4,6 +4,7 @@ import com.tracker.dto.FrameDTO;
 import com.tracker.entity.Frame;
 import com.tracker.exception.ResourceNotFoundException;
 import com.tracker.repository.FrameRepository;
+import com.tracker.repository.FrameEntryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 public class FrameService {
 
     private final FrameRepository frameRepository;
+    private final FrameEntryRepository frameEntryRepository;
 
     public FrameDTO createFrame(FrameDTO dto) {
         Frame frame = Frame.builder()
@@ -55,6 +57,8 @@ public class FrameService {
         if (!frameRepository.existsById(id)) {
             throw new ResourceNotFoundException("Frame", id);
         }
+        frameEntryRepository.deleteByFrameId(id);
+        frameEntryRepository.flush();
         frameRepository.deleteById(id);
     }
 

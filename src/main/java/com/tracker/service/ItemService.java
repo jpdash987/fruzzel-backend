@@ -6,6 +6,7 @@ import com.tracker.entity.Item;
 import com.tracker.exception.ResourceNotFoundException;
 import com.tracker.repository.CustomerRepository;
 import com.tracker.repository.ItemRepository;
+import com.tracker.repository.ItemEntryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ public class ItemService {
 
     private final ItemRepository itemRepository;
     private final CustomerRepository customerRepository;
+    private final ItemEntryRepository itemEntryRepository;
 
     public ItemDTO createItem(ItemDTO dto) {
         Customer customer = customerRepository.findById(dto.getCustomerId())
@@ -77,6 +79,8 @@ public class ItemService {
         if (!itemRepository.existsById(id)) {
             throw new ResourceNotFoundException("Item", id);
         }
+        itemEntryRepository.deleteByItemId(id);
+        itemEntryRepository.flush();
         itemRepository.deleteById(id);
     }
 
